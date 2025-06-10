@@ -1,0 +1,30 @@
+name: docker-stats
+on:
+  # runs every day at 03:07 UTC
+  schedule:
+    - cron:  '7 3 * * *'
+  # plus a button so you can test it manually
+  workflow_dispatch:
+
+jobs:
+  update-stats:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run tracker
+        env:
+          DOCKER_PROJECTS: |
+            [{"username":"redis","repository":"redis-stack"},
+             {"username":"valkey","repository":"valkey"},
+             {"username":"library","repository":"redis"}]
+          GITHUB_ACTIONS: "true"   # tells the script to commit & push
+        run: python docker_stats_tracker.py
